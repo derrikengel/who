@@ -20,7 +20,7 @@ app.get(/.*/, (_req, res) =>
 const minPlayers = 3;
 const maxPlayers = 15;
 const questionTimer = 20_000;
-const resultTimer = 15_000;
+const resultTimer = 10_000;
 
 /* ───────── runtime state ───────── */
 let players = {};           // socketId → { name, color, currentVote }
@@ -63,23 +63,54 @@ function updatePlayerList() {
     );
 }
 
+function replacePlayerNamePlaceholder(question, players) {
+  if (!question.includes('{{PLAYER_NAME}}')) return question;
+
+  if (players.length === 0) return question.replace(/{{PLAYER_NAME}}/g, 'someone');
+
+  const randomPlayer = players[Math.floor(Math.random() * players.length)];
+  const colorClass = `text-${randomPlayer.color}-700`;
+
+  // Return with the span and class attribute (no inline style)
+  const coloredName = `<span class="${colorClass}">${randomPlayer.name}</span>`;
+  return question.replace(/{{PLAYER_NAME}}/g, coloredName);
+}
+
+function getScaledResultTimer(playerCount) {
+    const minTime = 9_000;
+    const maxTime = 30_000;
+
+    if (playerCount <= minPlayers) return minTime;
+    if (playerCount >= maxPlayers) return maxTime;
+
+    const scale = (playerCount - minPlayers) / (maxPlayers - minPlayers);
+    return Math.round(minTime + scale * (maxTime - minTime));
+}
+
 /* ───────── round flow ───────── */
 function startNextRound() {
-    if (questionPool.length === 0) { endGame(); return; }
+  if (questionPool.length === 0) { endGame(); return; }
 
-    phase = 'question';
-    currentQuestion = questionPool.pop();
-    phaseDeadlineMs = Date.now() + questionTimer;
-    Object.values(players).forEach(p => (p.currentVote = null));
+  phase = 'question';
 
-    io.emit('new-question', {
-        question: currentQuestion,
-        players: Object.values(players).map(p => ({ name: p.name, color: p.color })),
-        votesCount: 0,
-        remaining: timeRemaining()
-    });
+  // Pick a random index
+  const randomIndex = Math.floor(Math.random() * questionPool.length);
+  currentQuestion = questionPool.splice(randomIndex, 1)[0]; // Remove question from pool
 
-    roundTimeout = setTimeout(finishRound, questionTimer);
+  const playersList = Object.values(players);
+  const questionWithName = replacePlayerNamePlaceholder(currentQuestion, playersList);
+
+  phaseDeadlineMs = Date.now() + questionTimer;
+  playersList.forEach(p => (p.currentVote = null));
+
+  io.emit('new-question', {
+    question: questionWithName,
+    players: playersList.map(p => ({ name: p.name, color: p.color })),
+    votesCount: 0,
+    remaining: timeRemaining()
+  });
+
+  roundTimeout = setTimeout(finishRound, questionTimer);
 }
 
 function finishRound() {
@@ -88,6 +119,10 @@ function finishRound() {
         if (p.currentVote != null) votes[id] = p.currentVote;
 
     phase = 'results';
+
+    const playerCount = Object.keys(players).length;
+    const scaledResultTimer = getScaledResultTimer(playerCount);
+
     phaseDeadlineMs = Date.now() + resultTimer;
     lastVotes = votes;
 
@@ -96,7 +131,7 @@ function finishRound() {
     setTimeout(() => {
         Object.values(players).forEach(p => (p.currentVote = null));
         startNextRound();
-    }, resultTimer);
+    }, scaledResultTimer);
 }
 
 function endGame() {
@@ -223,7 +258,7 @@ io.on('connection', socket => {
     socket.on('start-game', () => {
         const enough = Object.keys(players).length >= minPlayers && !currentQuestion;
         if (!enough) return;
-        questionPool = shuffle([...questions]);
+        questionPool = [...questions];
         startNextRound();
     });
 

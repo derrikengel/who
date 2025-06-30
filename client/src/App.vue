@@ -7,7 +7,7 @@
         wants to play?
       </h1>
 
-      <p v-if="lobbyFull">The game is currently full. Stick around an join when a spot opens up!</p>
+      <p v-if="lobbyFull">The game is currently full. Stick around and join when a spot opens up!</p>
 
       <form v-if="!lobbyFull" @submit.prevent="submitName" class="space-y-8">
         <div class="space-y-1">
@@ -74,7 +74,7 @@
         <h1 :class="`text-8xl uppercase font-display tracking-widest text-${playerColor}-700`">Who</h1>
 
         <div class="space-y-6">
-          <h2 class="text-5xl text-balance">{{ currentQuestion }}</h2>
+          <h2 class="text-5xl text-balance" v-html="currentQuestion"></h2>
 
           <p v-if="countdown" :class="['text-2xl', countdown <= 5 ? 'text-red-700' : 'text-stone-500']">
             {{ countdown }}s to answer!
