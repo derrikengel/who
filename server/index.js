@@ -18,13 +18,13 @@ app.get(/.*/, (_req, res) =>
 
 /* ───────── config ───────── */
 const minPlayers = 3;
-const maxPlayers = 15;
+const maxPlayers = 10;
 const questionTimer = 20_000;
 const resultTimer = 10_000;
 
 /* ───────── runtime state ───────── */
-let players = {};           // socketId → { name, color, currentVote }
-let pendingPlayers = {};           // socketId → previewColor  (NOT reserved)
+let players = {}; // socketId → { name, color, currentVote }
+let pendingPlayers = {}; // socketId → previewColor
 
 let questionPool = [];
 let currentQuestion = null;
@@ -38,14 +38,16 @@ let lastVotes = {}; // filled at finishRound()
 /* ───────── constants ───────── */
 const questions = JSON.parse(await readFile(path.join(__dirname, 'questions.json'), 'utf8'));
 
-const playerColors = [
-    'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal',
-    'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose'
-];
+// full list of tailwind colors
+// const playerColors = [
+//     'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal',
+//     'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose'
+// ];
+
+// limited version of colors for 10 players
+const playerColors = [ 'orange', 'yellow', 'lime', 'emerald', 'sky', 'blue', 'indigo', 'violet', 'fuchsia', 'pink' ];
 
 /* ───────── helpers ───────── */
-const shuffle = a => a.sort(() => Math.random() - 0.5);
-
 const timeRemaining = () =>
     Math.max(0, Math.ceil((phaseDeadlineMs - Date.now()) / 1000));
 
@@ -78,7 +80,7 @@ function replacePlayerNamePlaceholder(question, players) {
 
 function getScaledResultTimer(playerCount) {
     const minTime = 9_000;
-    const maxTime = 30_000;
+    const maxTime = 25_000;
 
     if (playerCount <= minPlayers) return minTime;
     if (playerCount >= maxPlayers) return maxTime;
@@ -148,8 +150,8 @@ io.on('connection', socket => {
     updatePlayerList();
     broadcastLobbyState();
 
-    /* preview colour (duplicates allowed until Join) */
-    const usedColors = Object.values(players).map(p => p.color);   // JOINED only
+    /* preview color (duplicates allowed until join) */
+    const usedColors = Object.values(players).map(p => p.color); // JOINED only
     const pool = playerColors.filter(c => !usedColors.includes(c));
     const previewColor = pool.length
         ? pool[Math.floor(Math.random() * pool.length)]
@@ -166,23 +168,23 @@ io.on('connection', socket => {
 
     if (Object.keys(players).length >= maxPlayers) return;
 
-    /* allow the client to request / change its colour -------------------- */
+    /* allow the client to request / change its color */
     socket.on('pick-color', requested => {
-        // 1) only accept colours in the palette
+        // 1) only accept colors in the palette
         if (!playerColors.includes(requested)) return
 
-        // 2) make sure the colour is not used by *another* joined player
+        // 2) make sure the color is not used by another joined player
         const taken = Object.entries(players).some(
             ([id, p]) => id !== socket.id && p.color === requested
         )
         if (taken) return
 
         if (players[socket.id]) {
-            /* the player has already joined – switch live ------------- */
+            /* the player has already joined – switch live */
             players[socket.id].color = requested
-            updatePlayerList()            // broadcast the change
+            updatePlayerList() // broadcast the change
         } else {
-            /* still on the join screen – just remember the preview ---- */
+            /* still on the join screen – just remember the preview */
             pendingPlayers[socket.id] = requested
         }
 
@@ -204,7 +206,7 @@ io.on('connection', socket => {
         }
         if (Object.keys(players).length >= maxPlayers) return;
 
-        /* pick the final colour (your current code) */
+        /* pick the final color (your current code) */
         let color = pendingPlayers[socket.id];
         if (Object.values(players).some(p => p.color === color)) {
             const free = playerColors.filter(c =>
@@ -217,10 +219,10 @@ io.on('connection', socket => {
         players[socket.id] = { name, color, currentVote: null };
         delete pendingPlayers[socket.id];
 
-        /* ───── refresh previews that collided ───── */
+        /* refresh previews that collided */
         Object.entries(pendingPlayers).forEach(([id, preview]) => {
             if (preview === color) {
-                // choose a new available preview colour
+                // choose a new available preview color
                 const used = [
                     ...Object.values(players).map(p => p.color),
                     ...Object.values(pendingPlayers) /* current previews */
@@ -231,14 +233,14 @@ io.on('connection', socket => {
                     playerColors[Math.floor(Math.random() * playerColors.length)];
 
                 pendingPlayers[id] = newPreview;
-                io.to(id).emit('color-update', newPreview);   // live update
+                io.to(id).emit('color-update', newPreview); // live update
             }
         });
 
         updatePlayerList();
         broadcastLobbyState();
 
-        /* ── late‑join sync ── */
+        /* late‑join sync */
         if (phase === 'question') {
             socket.emit('new-question', {
                 question: currentQuestion,
@@ -297,6 +299,5 @@ io.on('connection', socket => {
     });
 });
 
-/* ───────── listen ───────── */
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
