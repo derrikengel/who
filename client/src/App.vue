@@ -49,10 +49,10 @@
         </ul>
 
         <button type="submit" :disabled="joinDisabled" :class="[
-          'flex justify-center items-center gap-3 text-3xl px-8 py-4 rounded-full w-full transition-colors transition-border transition-text duration-150 ease-out',
+          'flex justify-center items-center gap-3 text-3xl px-8 py-4 rounded-full w-full transition-all duration-150 ease-out border-b-4',
           joinDisabled
-            ? 'bg-stone-300 text-stone-400 border-b-4 border-stone-400 cursor-not-allowed'
-            : `bg-${previewColor}-600 text-white border-b-4 border-${previewColor}-800 cursor-pointer`
+            ? 'bg-stone-300 text-stone-400 border-transparent cursor-not-allowed translate-y-0.75'
+            : `bg-${previewColor}-600 text-white border-${previewColor}-800 cursor-pointer hover:bg-${previewColor}-700 hover:border-transparent hover:translate-y-0.75`
         ]">
           Join
         </button>
@@ -87,11 +87,11 @@
             <ul v-if="votingAllowed" class="space-y-2">
               <li v-for="player in playerList" :key="player.socketId">
                 <button @click="vote(player.socketId)" :class="[
-                  'flex items-center gap-3 justify-center px-8 py-4 rounded-full w-full border-b-4 cursor-pointer',
-                  'transition-colors duration-150 ease-out',
+                  'flex items-center gap-3 justify-center px-8 py-4 rounded-full w-full border-b-4 text-white cursor-pointer',
+                  'transition-all duration-150 ease-out',
                   player.socketId === myCurrentVoteId
-                    ? `bg-${player.color}-600 text-white border-${player.color}-800`
-                    : `bg-white text-${player.color}-700 border-stone-200`
+                    ? `bg-${player.color}-700 border-transparent`
+                    : `bg-${player.color}-600 border-${player.color}-800 hover:bg-${player.color}-700 hover:border-transparent hover:translate-y-0.75`
                 ]">
                   <svg v-if="player.socketId === myCurrentVoteId" class="w-6 h-6" viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M510.537 105.794C510.219 104.105 509.291 102.592 507.929 101.543C493.428 90.063 459.145 43.77 436.629 51.4449C405.22 62.1621 232.546 289.334 194.267 339.4C180.9 320.298 69.5613 167.575 63.9748 170.999C44.8407 182.691 25.0917 192.688 6.8162 205.886C5.91679 206.504 5.15173 207.298 4.56697 208.22C3.98221 209.142 3.58983 210.172 3.4134 211.249C2.03808 212.285 1.00494 213.709 0.447475 215.338C-0.109989 216.967 -0.166164 218.726 0.286209 220.387C15.9751 284.097 69.3175 334.27 107.416 384.453C129.54 413.594 160.388 486.951 201.974 452.318C202.684 451.725 203.108 451.046 203.575 450.357C211.737 447.029 218.723 440.552 226.037 432.665C257.733 398.531 285.634 361.026 315.04 324.856C346.471 286.185 381.337 249.984 415.863 214.281C446.011 183.105 472.788 141.826 508.322 117.444C512.753 114.381 512.763 109.324 510.537 105.794ZM100.112 218.214C90.0619 209.309 79.6986 200.763 69.0419 192.592C80.4731 199.74 90.9188 208.353 100.112 218.214ZM52.3353 225.528C51.4809 224.658 50.4162 224.023 49.2443 223.685C48.0724 223.347 46.833 223.317 45.6463 223.599C44.2605 219.882 43.2173 216.047 42.5297 212.14C42.217 209.968 41.0777 208.001 39.3495 206.649C39.9856 206.172 40.5792 205.695 41.2365 205.228C41.362 207.127 42.0983 208.934 43.3354 210.38C67.4094 238.864 94.5364 264.284 119.013 292.387C121.822 295.62 124.568 298.885 127.324 302.129C101.321 277.493 78.3917 250.027 52.3353 225.528ZM149.882 415.704C152.31 418.502 154.727 421.312 157.207 424.057C160.08 427.979 162.985 431.902 165.985 435.771L166.017 435.898C160.133 430.598 154.727 423.114 149.882 415.704ZM157.674 353.595C164.808 359.891 172.271 365.891 180.115 370.704C179.935 371.921 180.007 373.163 180.327 374.351C180.423 374.87 180.635 375.39 180.836 375.898C173.28 368.295 165.557 360.859 157.674 353.595ZM192.37 435.442C192.348 435.368 192.359 435.294 192.327 435.241C192.073 434.658 191.776 434.138 191.522 433.566C198.794 433.481 208.313 428.085 218.765 419.679C209.532 428.393 200.405 434.531 192.37 435.442ZM440.053 71.7981C433.269 74.7557 427.619 79.3139 422.562 84.6673C427.566 77.5224 432.866 72.0313 440.053 71.7981ZM272.192 291.634C268.143 295.885 260.892 302.319 252.147 310.206C259.875 302.478 267.889 295.132 275.086 287.797C298.567 263.924 316.747 234.645 335.701 206.659C357.199 185.564 379.471 165.486 400.015 143.31C413.531 128.702 421.852 105.285 437.658 92.8085C427.121 103.918 418.799 119.967 411.697 135.391C400.428 147.264 390.464 160.684 380.011 173.681C346.821 215.002 308.648 253.376 272.192 291.634ZM411.029 192.836C394.312 213.094 375.549 231.539 357.708 250.79C371.171 233.914 384.538 216.953 396.813 199.08C397.778 197.67 398.944 195.688 400.227 193.26C404.541 188.946 408.856 184.642 413.085 180.253C425.34 167.49 439.905 153.465 448.841 137.14C455.976 127.547 463.788 118.027 472.619 112.303C459.824 141.338 428.796 171.327 411.029 192.836Z" />
@@ -170,7 +170,7 @@
 
         <!-- Start Game button -->
         <button v-if="canStart" @click="startGame"
-          :class="`bg-${playerColor}-600 border-b-4 border-${playerColor}-800 text-white px-8 py-4 rounded-full w-full cursor-pointer`">
+          :class="`bg-${playerColor}-600 border-b-4 border-${playerColor}-800 text-white px-8 py-4 rounded-full w-full cursor-pointer transition-all duration-150 ease-out hover:bg-${playerColor}-700 hover:border-transparent hover:translate-y-0.75`">
           Start Game
         </button>
       </div>
