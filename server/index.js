@@ -93,7 +93,7 @@ function getScaledResultTimer(playerCount) {
 
 /* ───────── round flow ───────── */
 function startNextRound() {
-    roundEnded = false; 
+    roundEnded = false;
 
     if (questionPool.length === 0) {
         endGame();
@@ -149,11 +149,23 @@ function finishRound() {
 
 function endGame() {
     phase = 'lobby';
+
+    clearTimeout(roundTimeout);
+    roundTimeout = null;
+
     clearTimeout(resultsTimeout);
+    resultsTimeout = null;
+
+    roundEnded = false;
+    phaseDeadlineMs = 0;
     currentQuestion = null;
     questionPool = [];
+    lastVotes = {};
+
     Object.values(players).forEach(p => (p.currentVote = null));
+
     io.emit('game-ended');
+    broadcastLobbyState();
 }
 
 /* ───────── connection handler ───────── */
@@ -259,7 +271,7 @@ io.on('connection', socket => {
                 votesCount: Object.values(players).filter(p => p.currentVote != null).length,
                 timeRemaining: timeRemaining()
             });
-            
+
             Object.entries(players).forEach(([id, p]) => {
                 if (p.currentVote != null) socket.emit('player-voted', { voterId: id });
             });
@@ -305,11 +317,31 @@ io.on('connection', socket => {
 
     /* disconnect */
     socket.on('disconnect', () => {
+        /* remove the player that left */
+        const wasPlayer = !!players[socket.id];
         delete players[socket.id];
         delete pendingPlayers[socket.id];
+
         updatePlayerList();
         broadcastLobbyState();
-        if (Object.keys(players).length < minPlayers && currentQuestion) endGame();
+
+        /* if not enough players, send remaining players back to lobby */
+        if (Object.keys(players).length < minPlayers && phase !== 'lobby') {
+            endGame();
+            return;
+        }
+
+        /* end the round early if remaining players have all voted */
+        if (phase === 'question') {
+            const everyoneVoted =
+                Object.values(players).length > 0 &&
+                Object.values(players).every(p => p.currentVote != null);
+
+            if (everyoneVoted) {
+                clearTimeout(roundTimeout);
+                finishRound();
+            }
+        }
     });
 });
 
