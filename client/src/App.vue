@@ -1,8 +1,8 @@
 <template>
-  <div class="game-container p-6 max-w-xl mx-auto text-center text-stone-700 text-3xl">
+  <div class="p-6 max-w-xl mx-auto text-center text-stone-700 text-3xl">
 
     <!-- Join Screen -->
-    <div v-if="!nameSubmitted" class="join-screen space-y-8">
+    <div v-if="!nameSubmitted" class="space-y-8">
       <div class="space-y-4">
         <h1 class="text-5xl">
           <span
@@ -76,7 +76,7 @@
     </div>
 
     <!-- Game Screen -->
-    <div v-else class="game-screen space-y-6">
+    <div v-else class="space-y-6">
       <div v-if="currentQuestion" class="space-y-12">
         <h1 :class="`text-8xl uppercase font-display tracking-widest text-${playerColor}-700`">Who</h1>
 
