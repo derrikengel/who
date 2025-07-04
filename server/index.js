@@ -82,7 +82,7 @@ function replacePlayerNamePlaceholder(question, players) {
 
     // Select a random player from the list.
     const randomPlayer = players[Math.floor(Math.random() * players.length)];
-    const colorClass = `text-${randomPlayer.color}-700`; // Tailwind CSS class for the player's color.
+    const colorClass = `text-${randomPlayer.color}-700 dark:text-${randomPlayer.color}-300`; // Tailwind CSS class for the player's color.
 
     // Create an HTML span with the color class to style the player's name.
     const coloredName = `<span class="${colorClass}">${randomPlayer.name}</span>`;
