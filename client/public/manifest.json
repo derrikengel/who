@@ -8,10 +8,22 @@
   "description": "A game of questionable accusations for 3-10 suspects.",
   "icons": [
     {
-      "src": "icon-512.svg",
+      "src": "/icons/icon-512.svg",
       "type": "image/svg+xml",
       "sizes": "any",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot-narrow.webp",
+      "sizes": "420x1000",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/screenshot-wide.webp",
+      "sizes": "1280x925",
+      "form_factor": "wide"
     }
   ]
 }
