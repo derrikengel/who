@@ -10,7 +10,8 @@
           wants to play?
         </h1>
 
-        <p class="text-2xl text-stone-500 dark:text-stone-400 leading-6 text-balance">A game of questionable accusations for 3-10 suspects.</p>
+        <p class="text-2xl text-stone-500 dark:text-stone-400 leading-6 text-balance">A game of questionable accusations
+          for 3-10 suspects.</p>
       </div>
 
       <!-- Lobby Full Message -->
@@ -65,7 +66,8 @@
       <!-- List of Players in the Lobby -->
       <div v-if="playerList.length" class="space-y-2">
         <h2>Connected players…</h2>
-        <ul class="divide-y divide-stone-200 dark:divide-stone-700 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md px-8">
+        <ul
+          class="divide-y divide-stone-200 dark:divide-stone-700 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md px-8">
           <li v-for="player in playerList" :key="player.socketId"
             :class="`flex items-center gap-3 justify-center py-4 text-${player.color}-700 dark:text-${player.color}-300`">
             {{ player.name }}
@@ -79,12 +81,14 @@
       <!-- Lobby (Post-Game or Pre-Game Waiting) -->
       <div v-if="!gameActive" class="space-y-8">
         <h1 class="text-5xl">
-          <span :class="`block text-8xl font-display uppercase tracking-widest text-${playerColor}-700 dark:text-${playerColor}-400`">Who</span>
+          <span
+            :class="`block text-8xl font-display uppercase tracking-widest text-${playerColor}-700 dark:text-${playerColor}-400`">Who</span>
           is playing?
         </h1>
 
         <!-- Lobby Player List -->
-        <ul class="divide-y divide-stone-200 dark:divide-stone-700 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md px-8">
+        <ul
+          class="divide-y divide-stone-200 dark:divide-stone-700 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md px-8">
           <li v-for="player in playerList" :key="player.socketId"
             :class="`flex items-center gap-3 justify-center py-4 text-${player.color}-700 dark:text-${player.color}-300`">
             {{ player.name }}
@@ -108,8 +112,10 @@
 
       <!-- Question Screen -->
       <div v-if="currentQuestion" class="space-y-12">
-        <h1 :class="`text-8xl uppercase font-display tracking-widest text-${playerColor}-700 dark:text-${playerColor}-400`">Who</h1>
-        
+        <h1
+          :class="`text-8xl uppercase font-display tracking-widest text-${playerColor}-700 dark:text-${playerColor}-400`">
+          Who</h1>
+
         <!-- Current Question -->
         <div class="space-y-6">
           <h2 class="text-5xl text-balance" v-html="currentQuestion"></h2>
@@ -173,15 +179,17 @@
 
           <!-- Vote Bar -->
           <div :class="`bg-stone-100 dark:bg-stone-700 rounded-full`">
-            <div :class="`bg-${entry.player.color}-600 dark:bg-${entry.player.color}-300 rounded-full text-white dark:text-stone-950 text-base text-left px-2 min-w-min`"
+            <div
+              :class="`bg-${entry.player.color}-600 dark:bg-${entry.player.color}-300 rounded-full text-white dark:text-stone-950 text-base text-left px-2 min-w-min`"
               :style="{ maxWidth: entry.percent + '%' }">{{ entry.percent }}%</div>
           </div>
 
-           <!-- Voters List -->
+          <!-- Voters List -->
           <div class="mt-2 text-xl flex flex-wrap justify-center gap-3">
             Who thinks so?
             <ul v-if="entry.voters.length" class="flex flex-wrap gap-3">
-              <li v-for="voter in entry.voters" :key="voter.socketId" :class="`text-${voter.color}-700 dark:text-${voter.color}-300`">
+              <li v-for="voter in entry.voters" :key="voter.socketId"
+                :class="`text-${voter.color}-700 dark:text-${voter.color}-300`">
                 {{ voter.name }}
               </li>
             </ul>
@@ -274,6 +282,7 @@
   // Emits an event to the server when the player picks a new color.
   function pickColor(c) {
     if (!colorAvailable(c)) return;
+    playColorSound(c); // Play the sound for the newly selected color.
     previewColor.value = c;
     socket.emit('pick-color', c);
   }
@@ -346,6 +355,23 @@
     countdown.value = null;
   }
 
+  // A Map to cache loaded <audio> elements. This improves performance by
+  // preventing the browser from re-downloading the same sound file on every click.
+  const soundCache = new Map();
+
+  function playColorSound(color) {
+    // If the sound for this color hasn't been loaded yet
+    if (!soundCache.has(color)) {
+      const audio = new Audio(`/sounds/${color}.mp3`); // Create a new Audio object with the path to the sound file.
+      audio.volume = 0.5; // Set a default volume.
+      soundCache.set(color, audio); // Store the newly created audio object in the cache for future use.
+    }
+
+    const audio = soundCache.get(color); // Retrieve the audio object from the cache.
+    audio.currentTime = 0; // Rewind the sound to the beginning.
+    audio.play().catch(() => { }); // Play the sound.
+  }
+
   /* ---------- UI ACTIONS ---------- */
   // These functions are called by user interactions (e.g., button clicks).
 
@@ -359,6 +385,8 @@
   // Called when a player clicks a name to vote.
   function vote(targetId) {
     if (!votingAllowed.value) return;
+    const targetPlayer = players[targetId]; // Find the player object that corresponds to the vote target.
+    if (targetPlayer) playColorSound(targetPlayer.color); // If the player exists, play the sound associated with their color.
     socket.emit('answer', targetId);
     myCurrentVoteId.value = targetId; // Immediately update the UI to show the selection.
   }
