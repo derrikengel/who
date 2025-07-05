@@ -8,9 +8,7 @@
   "description": "A game of questionable accusations for 3-10 suspects.",
   "icons": [
     {
-      "src": "/icon.svg",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "src": "icon.svg"
     }
   ]
 }
