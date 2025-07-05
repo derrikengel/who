@@ -1,0 +1,16 @@
+{
+  "name": "WHO",
+  "short_name": "WHO",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbfafa",
+  "theme_color": "#fbfafa",
+  "description": "A game of questionable accusations for 3-10 suspects.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
