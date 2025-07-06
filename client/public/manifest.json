@@ -2,7 +2,7 @@
   "name": "WHO",
   "short_name": "WHO",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#fbfafa",
   "description": "A game of questionable accusations for 3-10 suspects.",
   "icons": [
