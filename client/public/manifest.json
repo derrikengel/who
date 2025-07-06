@@ -4,7 +4,6 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fbfafa",
-  "theme_color": "#fbfafa",
   "description": "A game of questionable accusations for 3-10 suspects.",
   "icons": [
     {
@@ -17,7 +16,7 @@
   "screenshots": [
     {
       "src": "/screenshots/screenshot-narrow.webp",
-      "sizes": "420x1000",
+      "sizes": "420x917",
       "form_factor": "narrow"
     },
     {
