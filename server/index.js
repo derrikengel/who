@@ -178,7 +178,7 @@ function finishRound() {
     const playerCount = Object.keys(players).length;
     const scaledResultTimer = getScaledResultTimer(playerCount); // Calculate how long to show results.
 
-    phaseDeadlineMs = Date.now() + resultTimer; // Set the deadline for the results phase.
+    phaseDeadlineMs = Date.now() + scaledResultTimer; // Set the deadline for the results phase.
     lastVotes = votes; // Cache the votes for late-joiners.
 
     // Send the round results to all players in the 'game' room.
