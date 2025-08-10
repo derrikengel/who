@@ -144,14 +144,14 @@ function startNextRound() {
 
     const playersList = Object.values(players);
     // If the question contains a placeholder, replace it with a player's name.
-    const questionWithName = replacePlayerNamePlaceholder(currentQuestion, playersList);
+    currentQuestion = replacePlayerNamePlaceholder(currentQuestion, playersList);
 
     phaseDeadlineMs = Date.now() + questionTimer; // Set the deadline for answering.
     playersList.forEach(p => (p.currentVote = null)); // Reset all player votes.
 
     // Send the new question and round information to all players in the 'game' room.
     io.to('game').emit('new-question', {
-        question: questionWithName,
+        question: currentQuestion,
         players: playersList.map(p => ({ name: p.name, color: p.color })),
         votesCount: 0,
         timeRemaining: timeRemaining()
