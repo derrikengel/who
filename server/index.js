@@ -50,7 +50,7 @@ let lastVotes = {}; // Caches the votes of the last round to show to late-joinin
 // Load questions from a JSON file asynchronously and parse them.
 const questions = JSON.parse(await readFile(path.join(__dirname, 'questions.json'), 'utf8'));
 
-// A curated list of Tailwind color name for players, limited to 10 for the maximum number of players.
+// A curated list of Tailwind color names for players, limited to 10 colors for the maximum number of players.
 const playerColors = ['orange', 'yellow', 'lime', 'emerald', 'sky', 'blue', 'indigo', 'violet', 'fuchsia', 'pink'];
 
 /* ───────── HELPERS ───────── */
